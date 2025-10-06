@@ -1,0 +1,28 @@
+[
+  {
+    "id": "seed-1",
+    "slug": "otkrytaya-vstrecha-soobshchestva",
+    "title": "Открытая встреча сообщества",
+    "description": "Неформальный митап для знакомства, обмена идеями и анонсов будущих событий.",
+    "date": "2025-10-12",
+    "startTime": "19:00",
+    "endTime": "21:00",
+    "location": "Лофт на Набережной, зал B",
+    "url": "https://example.com/meetup",
+    "category": "Встреча",
+    "image": "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=1600&auto=format&fit=crop"
+  },
+  {
+    "id": "seed-2",
+    "slug": "master-klass-po-prezentatsiyam",
+    "title": "Мастер‑класс по презентациям",
+    "description": "Разбираем структуру, сторителлинг и дизайн. Практика на реальных кейсах.",
+    "date": "2025-10-19",
+    "startTime": "18:30",
+    "endTime": "20:30",
+    "location": "Онлайн (Zoom)",
+    "url": "https://example.com/workshop",
+    "category": "Мастер-класс",
+    "image": "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1600&auto=format&fit=crop"
+  }
+]
