@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 export default function App() {
   const [events, setEvents] = useState([])
@@ -35,7 +36,7 @@ export default function App() {
           <button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} className="px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">
             Тема: {theme === 'light' ? 'светлая' : 'тёмная'}
           </button>
-          <Link to="/admin" className="px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black text-sm shadow hover:opacity-90">
+          <Link to="/events/new" className="px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black text-sm shadow hover:opacity-90">
             + Добавить событие
           </Link>
         </div>
@@ -44,14 +45,13 @@ export default function App() {
       <main className="max-w-6xl mx-auto px-4 py-6">
         <Routes>
           <Route path="/" element={<ListPage events={events} />} />
-          <Route path="/e/:slug" element={<EventPage events={events} />} />
-          <Route path="/admin" element={<AdminPage events={events} setEvents={setEvents} />} />
+          <Route path="/events/:slug" element={<EventPage events={events} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
       <footer className="max-w-6xl mx-auto px-4 py-10 text-sm text-zinc-500 dark:text-zinc-400">
-        <p>Этот сайт статически публикует события из файла <code>/data/events.json</code>. Для обновления афиши — отредактируйте JSON в репозитории и задеплойте.</p>
+        <p>Сайт публикует события из файла <code>/data/events.json</code>. Обновите JSON — Netlify пересоберёт.</p>
       </footer>
     </div>
   )
@@ -115,7 +115,7 @@ function ListPage({ events }) {
       {filtered.length === 0 ? (
         <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl p-10 text-center bg-white dark:bg-zinc-900">
           <h2 className="text-lg font-medium mb-2">Пока что нет мероприятий</h2>
-          <p className="text-zinc-500">Добавьте первое в разделе «Добавить событие».</p>
+          <p className="text-zinc-500">Добавьте первое — отредактируйте <code>public/data/events.json</code>.</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -138,7 +138,7 @@ function EventCard({ item }) {
           <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">{category || 'Общее'}</span>
           <div className="text-xs text-zinc-500">{formatForList(date)}</div>
         </div>
-        <Link to={`/e/${slug}`} className="block">
+        <Link to={`/events/${slug}`} className="block">
           <h3 className="text-lg font-semibold leading-tight mb-1 hover:underline">{title}</h3>
         </Link>
         <p className="text-sm text-zinc-600 dark:text-zinc-300 line-clamp-3 mb-3">{description}</p>
@@ -149,7 +149,7 @@ function EventCard({ item }) {
         <div className="flex gap-2">
           <DownloadICS item={item} />
           {url && <a href={url} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black text-sm">Перейти</a>}
-          <Link to={`/e/${slug}`} className="px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">Подробнее</Link>
+          <Link to={`/events/${slug}`} className="px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">Подробнее</Link>
         </div>
       </div>
     </article>
@@ -163,9 +163,45 @@ function EventPage({ events }) {
   if (!ev) return <div className="text-center text-zinc-500">Событие не найдено.</div>
 
   const when = formatDateTime(ev.date, ev.startTime, ev.endTime)
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://taki-gulyaki.netlify.app'
+  const pageUrl = `${origin}/events/${ev.slug || slug}`
+  const title = `${ev.title} — Таки Гуляки`
+  const description = (ev.description || '').replace(/\s+/g, ' ').slice(0, 160)
+  const image = ev.image?.startsWith('http') ? ev.image : `${origin}${ev.image || '/favicon.svg'}`
+  const startISO = `${ev.date}T${(ev.startTime||'00:00')}:00`
+  const endISO = ev.endTime ? `${ev.date}T${ev.endTime}:00` : undefined
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: ev.title,
+    description: ev.description,
+    startDate: startISO,
+    endDate: endISO,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: ev.location ? { '@type': 'Place', name: ev.location } : undefined,
+    image: image,
+    url: pageUrl,
+    organizer: { '@type': 'Organization', name: 'Таки Гуляки', url: origin }
+  }
 
   return (
     <article className="max-w-3xl mx-auto">
+      <Helmet>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={pageUrl} />
+        <meta property="og:type" content="event" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={image} />
+        <meta property="og:url" content={pageUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={image} />
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
+
       <button onClick={() => navigate(-1)} className="mb-4 text-sm text-zinc-500 hover:underline">← Назад</button>
       <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
         {ev.image ? <img src={ev.image} alt="cover" className="w-full h-60 object-cover" /> : <div className="w-full h-60 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700" />}
@@ -195,48 +231,22 @@ function DownloadICS({ item }) {
   return <button onClick={downloadICS} className="px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">В календарь (.ics)</button>
 }
 
-function AdminPage() {
-  return (
-    <div className="max-w-3xl mx-auto text-sm text-zinc-600 dark:text-zinc-300">
-      <h2 className="text-xl font-semibold mb-2">Редактирование афиши</h2>
-      <p className="mb-3">Сайт читает данные из <code>/data/events.json</code>. Отредактируйте этот файл в репозитории и задеплойте.</p>
-      <p>Если нужна веб‑форма админки с экспортом JSON — напишите, добавлю.</p>
-    </div>
-  )
-}
-
 // === Utils ===
 function parseDateTime(dateStr, timeStr) {
   const [y,m,d] = (dateStr || '').split('-').map(Number)
   const [hh,mm] = (timeStr || '00:00').split(':').map(Number)
   return new Date(y, (m||1)-1, d||1, hh||0, mm||0, 0)
 }
-function startOfDay(d) {
-  const x = new Date(d); x.setHours(0,0,0,0); return x
-}
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x }
 function pad(n){return String(n).padStart(2,'0')}
-function slugify(str){
-  return String(str).toLowerCase().trim()
-    .replace(/\\s+/g,'-')
-    .replace(/[^a-z0-9\\-а-яё]/g,'')
-    .replace(/-+/g,'-')
-    .replace(/^-|-$/g,'')
-}
-function toICSDate(date, time){
-  const dt = parseDateTime(date, time)
-  return `${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`
-}
+function slugify(str){ return String(str).toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9\-а-яё]/g,'').replace(/-+/g,'-').replace(/^-|-$/g,'') }
+function toICSDate(date, time){ const dt = parseDateTime(date, time); return `${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00` }
 function buildICS(e){
   const uid = e.id || crypto.randomUUID()
   const dtstamp = new Date()
   const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//TakiGulyaki//RU//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    `UID:${uid}`,
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//TakiGulyaki//RU//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+    'BEGIN:VEVENT',`UID:${uid}`,
     `DTSTAMP:${dtstamp.getUTCFullYear()}${pad(dtstamp.getUTCMonth()+1)}${pad(dtstamp.getUTCDate())}T${pad(dtstamp.getUTCHours())}${pad(dtstamp.getUTCMinutes())}${pad(dtstamp.getUTCSeconds())}Z`,
     `DTSTART:${toICSDate(e.date, e.startTime || '00:00')}`,
     e.endTime ? `DTEND:${toICSDate(e.date, e.endTime)}` : `DTEND:${toICSDate(e.date, e.startTime || '00:00')}`,
@@ -244,14 +254,11 @@ function buildICS(e){
     e.location ? `LOCATION:${escapeICS(e.location)}` : null,
     e.description ? `DESCRIPTION:${escapeICS(e.description)}` : null,
     e.url ? `URL:${escapeICS(e.url)}` : null,
-    'END:VEVENT',
-    'END:VCALENDAR',
+    'END:VEVENT','END:VCALENDAR',
   ].filter(Boolean)
   return lines.join('\\r\\n')
 }
-function escapeICS(s){
-  return String(s).replace(/\\\\/g,'\\\\\\\\').replace(/\\n/g,'\\\\n').replace(/,/g,'\\\\,').replace(/;/g,'\\\\;')
-}
+function escapeICS(s){ return String(s).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;') }
 function formatDateTime(date, startTime, endTime) {
   const start = parseDateTime(date, startTime)
   const end = endTime ? parseDateTime(date, endTime) : null
