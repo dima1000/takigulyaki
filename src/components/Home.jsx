@@ -87,7 +87,7 @@ export default function Home({ events = [] }) {
                 <p className="text-zinc-700 dark:text-zinc-200 mb-4 whitespace-pre-wrap">{featured.description}</p>
                 <div className="flex flex-wrap gap-2">
                   <Link to={`/events/${featured.slug}`} className="px-4 py-2 rounded-xl bg-black text-white dark:bg-white dark:text-black">Подробнее</Link>
-                  <a href={featured.url || `https://t.me/share/url?url=${encodeURIComponent(location.href)}&text=${encodeURIComponent(featured.title)}`} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700">Поделиться</a>
+                  <a href={featured.url || `https://t.me/share/url?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(featured.title)}`} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700">Поделиться</a>
                   <button onClick={() => downloadICS(featured)} className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700">В календарь (.ics)</button>
                 </div>
               </div>
