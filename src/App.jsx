@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import Home from "./components/Home.jsx";
 
 export default function App() {
   const [events, setEvents] = useState([])
@@ -44,7 +45,7 @@ export default function App() {
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         <Routes>
-          <Route path="/" element={<ListPage events={events} />} />
+          <Route path="/" element={<Home events={events} />} />
           <Route path="/events/:slug" element={<EventPage events={events} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
