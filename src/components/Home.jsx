@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 // Главная страница проекта «Таки Гуляки»
 // - Hero с градиентом и CTA
@@ -26,6 +27,9 @@ export default function Home({ events = [] }) {
     [events]
   );
   const featured = upcoming[0];
+  const featuredUrl = typeof window !== 'undefined'
+   ? `${window.location.origin}/events/${featured?.slug || ''}`
+   : '';
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -43,6 +47,16 @@ export default function Home({ events = [] }) {
 
   return (
     <div>
+    <Helmet>
+      <title>Таки Гуляки — Наши мероприятия</title>
+      <meta name="description" content="Прогулки, встречи и мастер-классы сообщества «Таки Гуляки»." />
+      <link rel="canonical" href={typeof window !== 'undefined' ? window.location.origin : 'https://taki-gulyaki.netlify.app'} />
+      <meta property="og:title" content="Таки Гуляки — Наши мероприятия" />
+      <meta property="og:description" content="Прогулки, встречи и мастер-классы. Добавляйте в календарь и делитесь с друзьями." />
+      <meta property="og:image" content="/images/og-home.jpg" />
+      <meta property="og:type" content="website" />
+      <meta name="twitter:card" content="summary_large_image" />
+    </Helmet>
       {/* HERO */}
       <section className="relative overflow-hidden rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-teal-500/15 via-amber-500/10 to-fuchsia-500/10 p-8 md:p-12">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-teal-400/20 blur-3xl rounded-full" />
@@ -86,10 +100,27 @@ export default function Home({ events = [] }) {
                 )}
                 <p className="text-zinc-700 dark:text-zinc-200 mb-4 whitespace-pre-wrap">{featured.description}</p>
                 <div className="flex flex-wrap gap-2">
-                  <Link to={`/events/${featured.slug}`} className="px-4 py-2 rounded-xl bg-black text-white dark:bg-white dark:text-black">Подробнее</Link>
-                  <a href={featured.url || `https://t.me/share/url?url=${encodeURIComponent((typeof window !== 'undefined' ? window.location.href : ''))}&text=${encodeURIComponent(featured.title)}`} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700">Поделиться</a>
-                  <button onClick={() => downloadICS(featured)} className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700">В календарь (.ics)</button>
-                </div>
+		  <Link to={`/events/${featured.slug}`} className="px-4 py-2 rounded-xl bg-black text-white dark:bg-white dark:text-black">Подробнее</Link>
+		  <button onClick={() => downloadICS(featured)} className="px-4 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700">В календарь (.ics)</button>
+
+ 		 <div className="w-full h-px my-2 bg-zinc-200 dark:bg-zinc-800" />
+
+		  <a href={`https://t.me/share/url?url=${encodeURIComponent(featuredUrl)}&text=${encodeURIComponent(featured.title)}`}
+ 		    target="_blank" rel="noreferrer"
+ 		    className="px-3 py-1.5 rounded-xl border">Telegram</a>
+
+ 		 <a href={`https://wa.me/?text=${encodeURIComponent(featured.title + ' ' + featuredUrl)}`}
+		     target="_blank" rel="noreferrer"
+ 		    className="px-3 py-1.5 rounded-xl border">WhatsApp</a>
+
+ 		 <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(featuredUrl)}`}
+ 		    target="_blank" rel="noreferrer"
+ 		    className="px-3 py-1.5 rounded-xl border">Facebook</a>
+
+ 		 <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(featuredUrl)}&text=${encodeURIComponent(featured.title)}`}
+ 		    target="_blank" rel="noreferrer"
+ 		    className="px-3 py-1.5 rounded-xl border">X</a>
+		</div>
               </div>
             </article>
 
@@ -168,6 +199,10 @@ function EventCard({ item }) {
   const { title, description, date, startTime, endTime, location, url, category, image, slug } = item;
   const when = formatDateTime(date, startTime, endTime);
 
+  const pageUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/events/${slug}`
+    : '';
+
   return (
     <article className="group rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow">
       <Link to={`/events/${slug}`}>
@@ -197,6 +232,31 @@ function EventCard({ item }) {
           )}
           <Link to={`/events/${slug}`} className="px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">Подробнее</Link>
         </div>
+	<div className="flex gap-2 flex-wrap mt-2">
+	  <a
+	    href={`https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(title)}`}
+	    target="_blank" rel="noreferrer"
+ 	   className="px-2 py-1.5 rounded-xl border"
+	  >Telegram</a>
+
+	  <a
+	    href={`https://wa.me/?text=${encodeURIComponent(title + ' ' + pageUrl)}`}
+	    target="_blank" rel="noreferrer"
+ 	   className="px-2 py-1.5 rounded-xl border"
+ 	 >WhatsApp</a>
+
+	  <a
+ 	   href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
+ 	   target="_blank" rel="noreferrer"
+	    className="px-2 py-1.5 rounded-xl border"
+	  >Facebook</a>
+
+	  <a
+	    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(title)}`}
+	    target="_blank" rel="noreferrer"
+ 	   className="px-2 py-1.5 rounded-xl border"
+ 	 >X</a>
+	</div>
       </div>
     </article>
   );
