@@ -2,16 +2,18 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Таки Гуляки — мероприятия</title>
-    <meta name="description" content="Афиша проекта «Таки Гуляки»: встречи, мастер‑классы и события сообщества." />
-    <link rel="icon" href="/favicon.svg">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Таки Гуляки</title>
+    <!-- Vite подставит CSS/JS при билде -->
   </head>
-  <body class="bg-zinc-50">
+  <body>
+    <!-- ВАЖНО: именно id="root" -->
     <div id="root"></div>
+
+    <!-- ВАЖНО: точный путь на src/main.jsx -->
     <script type="module" src="/src/main.jsx"></script>
-	<form name="subscribe" netlify hidden>
-		<input type="email" name="email" />
-	</form>
   </body>
 </html>
