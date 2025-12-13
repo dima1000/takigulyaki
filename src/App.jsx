@@ -50,6 +50,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+{/* Диагностика */}
+<div style={{position:"fixed", bottom: 8, right: 8, padding: "6px 10px",
+  background: "#e5e7eb", borderRadius: 8, fontSize: 12, zIndex: 9999}}>
+  events: {Array.isArray(events) ? events.length : "?"}
+</div>
+
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-zinc-900/70 border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-500 to-amber-500 grid place-items-center text-white font-bold shadow">TG</div>
