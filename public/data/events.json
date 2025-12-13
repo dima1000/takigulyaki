@@ -1,19 +1,33 @@
 [
   {
-  "id": "pelmeni-1",
-  "slug": "pelmeni-vino",
-  "title": "ПЕЛЬМЕНИ & ВИНО — Гастрономическая встреча",
-  "description": "Кулинарная встреча с Александрой Пеле, готовим цветные сибирские Не Кошерные пельмени.",
-  "date": "2025-12-27",
-  "startTime": "10:00",
-  "endTime": "15:00",
-  "location": "Студия кухни, Тель-Авив",
-  "url": "https://gastro-ray.netlify.app/events/pelmeni"
-  "category": "Мастеркласс",
-  "image": "/images/pelmeni.jpg",
-  "sessions": [
-    { "id": "s1", "start": "2025-12-27T10:00:00+03:00", "end": "2025-10-27T15:00:00+03:00" },
-  ]
-}
-
+    "id": "pelmeni-1",
+    "slug": "pelmeni-vino",
+    "title": "ПЕЛЬМЕНИ & ВИНО — Гастрономическая пятница",
+    "description": "Встреча ценителей вкуса. Готовим, общаемся, наслаждаемся.",
+    "date": "2025-12-20",
+    "startTime": "19:00",
+    "endTime": "22:00",
+    "location": "Студия кухни, Тель-Авив",
+    "category": "Гастровечер",
+    "image": "/favicon.svg",
+    "sessions": [
+      {
+        "id": "s1",
+        "start": "2025-12-20T19:00:00+02:00",
+        "end": "2025-12-20T22:00:00+02:00"
+      }
+    ]
+  },
+  {
+    "id": "walk-1",
+    "slug": "progulka-yarkon",
+    "title": "Городская прогулка по парку Яркон",
+    "description": "Лёгкий маршрут и пикник в конце.",
+    "date": "2026-01-05",
+    "startTime": "10:00",
+    "endTime": "12:30",
+    "location": "Парк Яркон",
+    "category": "Прогулка",
+    "image": "/favicon.svg"
+  }
 ]
