@@ -9,13 +9,13 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("tg-theme") || "light");
 
-  // Тема (светлая/тёмная)
+  // Тема
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("tg-theme", theme);
   }, [theme]);
 
-  // Загрузка данных
+  // Данные
   useEffect(() => {
     fetch("/data/events.json", { cache: "no-store" })
       .then((r) => r.json())
@@ -123,4 +123,150 @@ function EventPage({ events }) {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm text-zinc-5
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 text-sm text-zinc-500 hover:underline"
+      >
+        ← Назад
+      </button>
+
+      <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+        {ev.image ? (
+          <img src={ev.image} alt="cover" className="w-full h-60 object-cover" />
+        ) : (
+          <div className="w-full h-60 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700" />
+        )}
+        <div className="p-5">
+          <div className="mb-2">
+            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+              {ev.category || "Общее"}
+            </span>
+          </div>
+
+          <h1 className="text-2xl font-semibold mb-2">{ev.title}</h1>
+          <div className="text-sm mb-3">
+            {when}
+            {ev.location ? ` • 📍 ${ev.location}` : ""}
+          </div>
+
+          {ev.url && (
+            <a
+              href={ev.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex px-3 py-1.5 rounded-xl bg-black text-white dark:bg-white dark:text-black text-sm mb-3"
+            >
+              Перейти на страницу события
+            </a>
+          )}
+
+          <p className="whitespace-pre-wrap leading-relaxed text-zinc-700 dark:text-zinc-200">{ev.description}</p>
+
+          {/* Кнопка .ics */}
+          <div className="mt-4">
+            <DownloadICS item={ev} />
+          </div>
+
+          {/* Виджет записи только для конкретного события */}
+          {ev.slug === "pelmeni-vino" && <ClientBookingPelmeni ev={ev} />}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ================= Утилиты и кнопка .ics ================= */
+
+function parseDateTime(dateStr, timeStr) {
+  const [y, m, d] = (dateStr || "").split("-").map(Number);
+  const [hh, mm] = (timeStr || "00:00").split(":").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, 0);
+}
+
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+
+function toICSDate(date, time) {
+  const dt = parseDateTime(date, time);
+  return `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(
+    dt.getMinutes()
+  )}00`;
+}
+
+function escapeICS(s) {
+  return String(s).replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+}
+
+function buildICS(e) {
+  const uid = e.id || (crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+  const dtstamp = new Date();
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//TakiGulyaki//RU//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${dtstamp.getUTCFullYear()}${pad(dtstamp.getUTCMonth() + 1)}${pad(dtstamp.getUTCDate())}T${pad(
+      dtstamp.getUTCHours()
+    )}${pad(dtstamp.getUTCMinutes())}${pad(dtstamp.getUTCSeconds())}Z`,
+    `DTSTART:${toICSDate(e.date, e.startTime || "00:00")}`,
+    e.endTime ? `DTEND:${toICSDate(e.date, e.endTime)}` : `DTEND:${toICSDate(e.date, e.startTime || "00:00")}`,
+    `SUMMARY:${escapeICS(e.title)}`,
+    e.location ? `LOCATION:${escapeICS(e.location)}` : null,
+    e.description ? `DESCRIPTION:${escapeICS(e.description)}` : null,
+    e.url ? `URL:${escapeICS(e.url)}` : null,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].filter(Boolean);
+  return lines.join("\r\n");
+}
+
+function formatDateTime(date, startTime, endTime) {
+  const start = parseDateTime(date, startTime);
+  const end = endTime ? parseDateTime(date, endTime) : null;
+  const fmtDate = new Intl.DateTimeFormat("ru-RU", {
+    weekday: "short",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Jerusalem",
+  }).format(start);
+  const fmtTime = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem" }).format(start);
+  const fmtEnd = end
+    ? new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem" }).format(end)
+    : null;
+  return `${fmtDate}, ${fmtTime}${fmtEnd ? "—" + fmtEnd : ""}`;
+}
+
+function slugify(str) {
+  return String(str)
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-а-яё]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function DownloadICS({ item }) {
+  function downloadICS() {
+    const ics = buildICS(item);
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${slugify(item.title)}.ics`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  return (
+    <button
+      onClick={downloadICS}
+      className="px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm"
+    >
+      В календарь (.ics)
+    </button>
+  );
+}
