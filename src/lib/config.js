@@ -1,2 +1,2 @@
-// замените на свой номер (без +), с кодом страны
-export const WHATSAPP_BASE_URL = "https://wa.me/972527909171";
+// Замените номер на свой (с кодом страны), без плюса
+export const WHATSAPP_BASE_URL = "https://wa.me/972XXXXXXXXX";
