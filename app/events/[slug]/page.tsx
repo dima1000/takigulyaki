@@ -17,9 +17,10 @@ export function generateMetadata(
   const ev = (events as EventItem[]).find((e) => e.slug === params.slug);
   if (!ev) return {};
 
-  const title = `${ev.title} — Гастрономический Рай`;
+  const title = `${ev.title} — Таки Гуляки`;
   const description = (ev.description || "").slice(0, 160);
   const image = ev.image || "/images/og-home.jpg";
+  const url = `https://https://takigulyaki.com//events/${ev.slug}`;
 
   return {
     title,
@@ -38,7 +39,7 @@ export default function EventPage({ params }: { params: { slug: string } }) {
   }`;
 
   // Кнопка записи в WhatsApp с автотекстом
-  const wa = `https://wa.me/972XXXXXXXXX?text=${encodeURIComponent(
+  const wa = `https://wa.me/972527909171?text=${encodeURIComponent(
     `Здравствуйте! Хочу записаться на «${ev.title}» (${ev.date}${
       ev.startTime ? " " + ev.startTime : ""
     }).`
