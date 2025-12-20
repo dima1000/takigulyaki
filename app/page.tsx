@@ -21,6 +21,17 @@ export default function Home() {
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-teal-400/20 blur-3xl rounded-full" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-400/20 blur-3xl rounded-full" />
         <div className="relative">
+	{/* Главное фото */}
+	<div className="mb-6 overflow-hidden rounded-3xl border border-zinc-200">
+	  {/* eslint-disable-next-line @next/next/no-img-element */}
+	  <img
+ 	   src="/images/hero.jpg"
+  	   alt="Главное фото сообщества"
+ 	   className="w-full h-64 md:h-80 object-cover"
+	   loading="eager"
+ 	 />
+	</div>
+
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">Гастрономический Рай</h1>
           <p className="text-zinc-700 max-w-2xl text-lg">Мероприятия сообщества: вкусы, люди и открытия.</p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
